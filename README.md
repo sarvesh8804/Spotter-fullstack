@@ -78,12 +78,9 @@ directory left at the repository root — no other build settings are required.
 Because both services share a domain, the frontend calls `/api/...` directly and
 needs no `VITE_API_URL`.
 
-Recommended environment variable:
-
-- `DJANGO_SECRET_KEY` — any long random string
-
-`DEBUG` defaults to off and `ALLOWED_HOSTS` includes `.vercel.app` whenever the
-`VERCEL` environment variable is present.
+No environment variables are required. This assessment is a stateless demo;
+`DEBUG` defaults to off and `ALLOWED_HOSTS` includes `.vercel.app` whenever
+Vercel deploys it.
 
 ### Alternative: split hosting
 

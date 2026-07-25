@@ -45,6 +45,7 @@ export default function App() {
         </div>
 
         <div className="topbar-right">
+          <span className="pill">by Sarvesh Huddar</span>
           <span className="pill">70hr / 8day · FMCSA</span>
         </div>
       </header>
@@ -154,7 +155,7 @@ export default function App() {
 
       <footer className="footer">
         <span>Django · React · OSRM · Photon · FMCSA HOS</span>
-        <span>Spotter AI assessment</span>
+        <span>Built by Sarvesh Huddar · Spotter AI assessment</span>
       </footer>
     </div>
   );

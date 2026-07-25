@@ -7,10 +7,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 ON_VERCEL = bool(os.environ.get("VERCEL"))
 
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-spotter-assessment-dev-key-change-in-prod",
-)
+# This assessment is a short-lived, stateless demo with no user accounts or
+# persisted sessions. No deployment secret is required.
+SECRET_KEY = "spotter-hos-assessment-demo-only-not-for-production"
 
 DEBUG = (
     os.environ.get("DJANGO_DEBUG", "false" if ON_VERCEL else "true").lower() == "true"
