@@ -69,21 +69,27 @@ python manage.py test trips
 
 ## Deploy
 
-### Frontend (Vercel)
+### Vercel (frontend + backend in one project)
 
-1. Import the repo; set root directory to `frontend`
-2. Build: `npm run build` · Output: `dist`
-3. Env: `VITE_API_URL=https://<your-backend-host>`
+`vercel.json` defines two [services](https://vercel.com/docs/services): the Vite
+app at `/` and the Django app at `/api`. Import the repo in Vercel with the root
+directory left at the repository root — no other build settings are required.
 
-### Backend (Railway / Render)
+Because both services share a domain, the frontend calls `/api/...` directly and
+needs no `VITE_API_URL`.
 
-1. Root or `backend` with `requirements.txt`
-2. Start: `gunicorn config.wsgi --bind 0.0.0.0:$PORT` (from `backend/`)
-3. Env:
-   - `DJANGO_SECRET_KEY`
-   - `DJANGO_DEBUG=false`
-   - `DJANGO_ALLOWED_HOSTS=<host>`
-   - `CORS_ALLOWED_ORIGINS=https://<vercel-app>`
+Recommended environment variable:
+
+- `DJANGO_SECRET_KEY` — any long random string
+
+`DEBUG` defaults to off and `ALLOWED_HOSTS` includes `.vercel.app` whenever the
+`VERCEL` environment variable is present.
+
+### Alternative: split hosting
+
+`Procfile` and `railway.toml` are kept for hosting Django on Railway or Render:
+start with `gunicorn config.wsgi --bind 0.0.0.0:$PORT` from `backend/`, then set
+`VITE_API_URL` and `CORS_ALLOWED_ORIGINS` to point the two hosts at each other.
 
 ## Loom walkthrough outline (3–5 min)
 

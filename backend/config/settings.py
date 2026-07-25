@@ -5,18 +5,27 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ON_VERCEL = bool(os.environ.get("VERCEL"))
+
 SECRET_KEY = os.environ.get(
     "DJANGO_SECRET_KEY",
     "django-insecure-spotter-assessment-dev-key-change-in-prod",
 )
 
-DEBUG = os.environ.get("DJANGO_DEBUG", "true").lower() == "true"
+DEBUG = (
+    os.environ.get("DJANGO_DEBUG", "false" if ON_VERCEL else "true").lower() == "true"
+)
 
 ALLOWED_HOSTS = [
     h.strip()
-    for h in os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    for h in os.environ.get(
+        "DJANGO_ALLOWED_HOSTS",
+        ".vercel.app,localhost,127.0.0.1" if ON_VERCEL else "localhost,127.0.0.1",
+    ).split(",")
     if h.strip()
 ]
+
+CSRF_TRUSTED_ORIGINS = ["https://*.vercel.app"] if ON_VERCEL else []
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -61,10 +70,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+# Trip planning is stateless; the DB only backs admin/sessions. Serverless
+# filesystems are read-only apart from /tmp.
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": Path("/tmp/db.sqlite3") if ON_VERCEL else BASE_DIR / "db.sqlite3",
     }
 }
 

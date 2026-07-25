@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .serializers import PlanTripSerializer
-from .services.geocoding import geocode
+from .services.geocoding import geocode_many
 from .services.hos_planner import plan_trip
 from .services.routing import route_between
 
@@ -26,9 +26,13 @@ class PlanTripView(APIView):
         data = serializer.validated_data
 
         try:
-            current = geocode(data["current_location"])
-            pickup = geocode(data["pickup_location"])
-            dropoff = geocode(data["dropoff_location"])
+            current, pickup, dropoff = geocode_many(
+                [
+                    data["current_location"],
+                    data["pickup_location"],
+                    data["dropoff_location"],
+                ]
+            )
             route = route_between(
                 [
                     (current["lat"], current["lon"]),

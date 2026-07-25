@@ -1,4 +1,6 @@
-const API_BASE = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+// Same-origin by default: the Vite dev proxy handles local, and on Vercel the
+// Django service is mounted at /api on the same domain.
+const API_BASE = import.meta.env.VITE_API_URL || "";
 
 export async function planTrip(payload) {
   const res = await fetch(`${API_BASE}/api/plan-trip/`, {

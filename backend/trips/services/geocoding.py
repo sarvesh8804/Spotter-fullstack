@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import threading
 import time
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 import requests
@@ -13,10 +15,20 @@ NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 OPEN_METEO_URL = "https://geocoding-api.open-meteo.com/v1/search"
 
 _last_nominatim = 0.0
+_nominatim_lock = threading.Lock()
+
+_cache: dict[str, dict[str, Any]] = {}
+_cache_lock = threading.Lock()
 
 
 def geocode(query: str) -> dict[str, Any]:
     """Return {lat, lon, display_name, query} for a free-text place."""
+    key = query.strip().lower()
+    with _cache_lock:
+        hit = _cache.get(key)
+    if hit:
+        return dict(hit)
+
     errors: list[str] = []
 
     for fn in (_geocode_photon, _geocode_open_meteo, _geocode_nominatim):
@@ -24,6 +36,8 @@ def geocode(query: str) -> dict[str, Any]:
             result = fn(query)
             if result:
                 result["query"] = query
+                with _cache_lock:
+                    _cache[key] = dict(result)
                 return result
         except Exception as exc:  # noqa: BLE001
             errors.append(f"{fn.__name__}: {exc}")
@@ -31,6 +45,12 @@ def geocode(query: str) -> dict[str, Any]:
     raise ValueError(
         f"Could not geocode location: {query!r} ({'; '.join(errors) or 'no results'})"
     )
+
+
+def geocode_many(queries: list[str]) -> list[dict[str, Any]]:
+    """Geocode several places concurrently, preserving input order."""
+    with ThreadPoolExecutor(max_workers=min(4, len(queries) or 1)) as pool:
+        return list(pool.map(geocode, queries))
 
 
 def _geocode_photon(query: str) -> dict[str, Any] | None:
@@ -100,9 +120,12 @@ def _geocode_open_meteo(query: str) -> dict[str, Any] | None:
 
 def _geocode_nominatim(query: str) -> dict[str, Any] | None:
     global _last_nominatim
-    elapsed = time.time() - _last_nominatim
-    if elapsed < 1.05:
-        time.sleep(1.05 - elapsed)
+    # Nominatim's usage policy allows at most one request per second.
+    with _nominatim_lock:
+        elapsed = time.time() - _last_nominatim
+        if elapsed < 1.05:
+            time.sleep(1.05 - elapsed)
+        _last_nominatim = time.time()
 
     response = requests.get(
         NOMINATIM_URL,
@@ -114,7 +137,6 @@ def _geocode_nominatim(query: str) -> dict[str, Any] | None:
         },
         timeout=30,
     )
-    _last_nominatim = time.time()
     response.raise_for_status()
     data = response.json()
     if not data:
