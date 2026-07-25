@@ -1,0 +1,57 @@
+:root {
+  --bg: #eceff3;
+  --panel: #ffffff;
+  --panel-soft: #f6f7f9;
+  --ink: #16181d;
+  --muted: #6b7280;
+  --line: #e2e5eb;
+  --line-strong: #cfd4dc;
+  --yellow: #e8f04a;
+  --yellow-deep: #d4dc2e;
+  --blue: #2f6fed;
+  --green: #1f9d63;
+  --orange: #f0a020;
+  --violet: #7c6cf0;
+  --rose: #e25d6a;
+  --shadow: 0 8px 28px rgba(22, 24, 29, 0.06);
+  --radius: 14px;
+  --font: "DM Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  color: var(--ink);
+  background: var(--bg);
+  font-family: var(--font);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-width: 320px;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
